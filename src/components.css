@@ -22,7 +22,7 @@
   .btn-start {
     max-width: 150px;
     width: 50%;
-    font-size: calc(23px + 11 * (100vw - 768px) / 1440);
+    font-size: 32px;
     transition: 0.3s ease;
   }
   .btn-start.clicked {
@@ -67,3 +67,4 @@
     100% { transform: translate(0, 0); }
   }
 
+  
