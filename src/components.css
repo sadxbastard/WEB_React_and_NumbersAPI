@@ -9,11 +9,13 @@
     width: 100%;
     transition: 0.3s ease;
   }
+
   .btn-quiz.clicked {
     background-color: #fff;
     color: #000;
     transition: 0.2s ease;
   }
+
   .btn-quiz.unclicked {
     background-color: #000;
     color: #fff;
@@ -25,7 +27,8 @@
     font-size: 32px;
     transition: 0.3s ease;
   }
-  .btn-start.clicked {
+
+  .btn-start.ready {
     background-color: #fff;
     color: #000;
     transition: 0.3s ease;
@@ -67,4 +70,33 @@
     100% { transform: translate(0, 0); }
   }
 
-  
+  .check-btn {
+    height: calc(65px + 15 * (100vw - 768px) / 1440);
+    padding: 0 20px;
+    border: 1px solid #fff;
+    border-radius: 100px;
+    transition: 0.3s ease;
+    margin-bottom: 20px;
+  }
+
+  .check-btn:hover {
+    border: 1px solid #373737;
+  }
+
+  .check-btn.ready {
+    background-color: #fff;
+    color: #000;
+    transition: 0.3s ease;
+  }
+
+  .remove-answer-btn {
+    height: calc(65px + 15 * (100vw - 768px) / 1440);
+    padding: 0 20px;
+    border: 1px solid #fff;
+    border-radius: 100px;
+    transition: 0.3s ease;
+  }
+
+  .remove-answer-btn:hover {
+    border: 1px solid #373737;
+  }

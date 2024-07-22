@@ -122,3 +122,27 @@
   .content-question-answers {
     
   }
+
+  .content-preloader {
+    display: none;
+    flex: 1;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+    border-style: dashed;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .preloader {
+    text-align: start;
+    width: 200px;
+  }
+
+  .content-buttons {
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }

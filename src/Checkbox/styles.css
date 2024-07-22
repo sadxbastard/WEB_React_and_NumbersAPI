@@ -1,25 +1,10 @@
 .checkbox-wrapper {
     display: block;
     position: relative;
-    width: 100%;
+    width: max-content;
     margin-bottom: 34px;
     height: 54px;
 }
-
-/* .checkbox-element {
-    appearance: none;
-    position: absolute;
-    top: 15px;
-    margin: 0;
-    width: 24px;
-    height: 24px;
-    border: 1px solid #fff;
-    border-radius: 2px;
-}
-
-.checkbox-element:checked {
-    background-color: #fff;
-} */
 
 .checkbox-element {
     appearance: none;
@@ -44,7 +29,7 @@
     position: absolute;
     width: 4px;
     height: 10px;
-    border: solid #000; /* Цвет галочки */
+    border: solid #000;
     border-width: 0 2px 2px 0;
     transform: rotate(43deg);
     top: 3px;

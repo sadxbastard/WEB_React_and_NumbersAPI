@@ -4,33 +4,36 @@ import { useState, useEffect, useRef } from 'react';
 import { Checkbox } from "./Checkbox/Checkbox";
 import { getQuestion } from "./Servises.jsx";
 
-function App() {
+export default function App() {
   const [activeQUIZButton, setActiveQUIZButton] = useState(null);
   const [isVisibleImg, setIsVisibleImg] = useState(true);
   const [isActtiveStart, setIsActiveStart] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingDots, setLoadingDots] = useState(0);
+
+  const [selectedCheckbox, setSelectedCheckbox] = useState(null); 
+  const [question, setQuestion] = useState("Question");
+  const [answers, setAnswers] = useState([]);
+  const [correctAnswer, setCorrectAnswer] = useState(null);
+
   const contentImgRef = useRef(null);
   const questionContentRef = useRef(null);
+  const loadingRef = useRef(null);
 
-  const [checked, setChecked] = useState(false);
-  const [question, setQuestion] = useState("Question");
-
-  const handleQUIZClick = (buttonId) => {
-    if (activeQUIZButton === buttonId){
-      setActiveQUIZButton(null);
-      setIsVisibleImg(true);
-    }
-    else if (activeQUIZButton !== buttonId && !isActtiveStart){
-      setActiveQUIZButton(buttonId);
-    }
-    // else if (activeQUIZButton !== buttonId && isActtiveStart){
-    //   setActiveQUIZButton(buttonId);
-    //   setIsVisibleImg(true);
-    // }
-    else{
-      setActiveQUIZButton(buttonId);
-      setIsVisibleImg(true);
-    }
-  };
+    const handleQUIZClick = (buttonId) => {
+      if (activeQUIZButton === buttonId){
+        setActiveQUIZButton(null);
+        setIsVisibleImg(true);
+      }
+      else if (activeQUIZButton !== buttonId && !isActtiveStart){
+        setActiveQUIZButton(buttonId);
+      }
+      else{
+        setIsActiveStart(false);
+        setActiveQUIZButton(buttonId);
+        setIsVisibleImg(true);
+      }
+    };
 
   const handleStartClick = async () => {
     if (activeQUIZButton === null) {
@@ -41,25 +44,83 @@ function App() {
         spanElement.classList.remove('shake');
       }, 1000);
     }
-    else{
+    else if (activeQUIZButton !== null){
+      setIsVisibleImg(false);
+      setIsLoading(true); // show preloader
+      setIsActiveStart(true);
       try {
         const questionData = await getQuestion(activeQUIZButton);
-        const modifiedText = questionData.text.replace(activeQUIZButton === "date" ? questionData.year : questionData.number, '...');
+        const modifiedText = questionData.text.replace(activeQUIZButton === "date" ?
+                             questionData.year : questionData.number, '...');
         setQuestion(modifiedText);
-        setIsVisibleImg(false);
-        setIsActiveStart(true);
+
+        const correctAnswer = activeQUIZButton === "date" ? questionData.year : questionData.number;
+        setCorrectAnswer(correctAnswer);
+        
+        const answers = generateAnswers(correctAnswer);
+        setAnswers(answers);
+        console.log("Correct ans ID: " + correctAnswer);
       } catch (error) {
         console.error('Error fetching question:', error);
+      } finally {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
     }
   };
 
-  useEffect(() => {
-    if (contentImgRef.current && questionContentRef.current) {
-      contentImgRef.current.style.display = isVisibleImg ? 'flex' : 'none';
-      questionContentRef.current.style.display = isVisibleImg ? 'none' : 'block'; 
+  const handleCheckClick = () => {
+    if (selectedCheckbox === null) {
+      const spanElement = document.getElementById('select');
+      spanElement.classList.add('shake');
+
+      setTimeout(() => {
+        spanElement.classList.remove('shake');
+      }, 1000);
     }
-  }, [isVisibleImg]);
+    else{
+      if(correctAnswer === selectedCheckbox){
+        console.log("Correct");
+      }
+      else console.log("Uncorrect");
+    }
+  };
+
+  const generateAnswers = (correctAnswer) => {
+    const incorrectAnswers = new Set(); // created set, so that there are no duplicate values
+    while (incorrectAnswers.size < 3) {
+      const randomOffset = Math.floor(Math.random() * 10) + 1; // generate from 1 to 10
+      const incorrectAnswer = Math.random() > 0.5 // randomly determine the wrong answers
+        ? correctAnswer + randomOffset
+        : correctAnswer - randomOffset;
+      incorrectAnswers.add(incorrectAnswer);
+    }
+    const answersArray = [...incorrectAnswers]; // converting a set into an array
+    const randomIndex = Math.floor(Math.random() * 4); // define a random position for the correct answer
+    answersArray.splice(randomIndex, 0, correctAnswer); // insert the correct answer into the array at the specified position
+    return answersArray;
+  };
+
+  useEffect(() => {
+    if (contentImgRef.current && questionContentRef.current && loadingRef.current) {
+      contentImgRef.current.style.display = isVisibleImg ? 'flex' : 'none';
+      loadingRef.current.style.display = isLoading ? 'flex' : 'none';
+      questionContentRef.current.style.display = !isVisibleImg && !isLoading ? 'block' : 'none';
+    }
+  }, [isVisibleImg, isLoading]);
+
+  useEffect(() => {
+    let interval;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setLoadingDots(prev => (prev + 1) % 4);
+      }, 200);
+    } else {
+      setLoadingDots(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   return (
     <>
@@ -81,7 +142,7 @@ function App() {
                       onClick={() => handleQUIZClick('date')}>
                 Date
               </button>
-              <button className={`btn-start ${activeQUIZButton === null ? '' : 'clicked'}`}
+              <button className={`btn-start ${activeQUIZButton === null ? '' : 'ready'}`}
                       onClick={handleStartClick}>
                 Start
               </button>
@@ -100,27 +161,36 @@ function App() {
           </div>
         </div>
         <div className="column column2">
+          <div className="content-preloader" ref={loadingRef}>
+            <span className="preloader">Loading{".".repeat(loadingDots)}</span>
+          </div>
           <div className="content-img" ref={contentImgRef}> 
             <img id="img_quiz" src="/svg_quiz.svg" alt='QUIZ'/>
           </div>
-          <form className="content-question" ref={questionContentRef}>
+          <div className="content-question" ref={questionContentRef}>
             <div className="content-question-paragraph">
-              <span className="text">Select an answer</span>
+              <span className="text" id="select">Select an answer</span>
             </div>
             <div className="content-question-text">
               <span>{question}</span>
             </div>
             <div className="content-question-answers">
-              <Checkbox checked={checked} onChange={setChecked}>number</Checkbox>
-              <Checkbox checked={checked} onChange={setChecked}>number</Checkbox>
-              <Checkbox checked={checked} onChange={setChecked}>number</Checkbox>
-              <Checkbox checked={checked} onChange={setChecked}>number</Checkbox>
+              {answers.map((answer, index) => (
+                  <Checkbox key={index} id={index} 
+                  selectedCheckbox={selectedCheckbox}
+                  setSelectedCheckbox={setSelectedCheckbox}>{answer}</Checkbox>
+                ))}
             </div>
-          </form>
+            <div className="content-buttons">
+              <button className={`check-btn ${selectedCheckbox === null ? '' : 'ready'}`}
+                      onClick={handleCheckClick}>
+                Check
+              </button>
+              <button className="remove-answer-btn">Remove one</button>
+            </div>
+          </div>
         </div>
       </div>
     </>
   );
 }
-
-export default App;
