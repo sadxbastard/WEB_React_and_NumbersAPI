@@ -1,5 +1,5 @@
 .btn-quiz, .btn-start {
-    height: calc(65px + 15 * (100vw - 768px) / 1440);
+    height: calc(50px + 20 * (100vh - 600px) / 600);
     border: 1px solid #fff;
     border-radius: 100px;
   }
@@ -24,7 +24,7 @@
   .btn-start {
     max-width: 150px;
     width: 50%;
-    font-size: 32px;
+    font-size: calc(20px + 11 * (100vw - 768px) / 672);
     transition: 0.3s ease;
   }
 
@@ -71,7 +71,7 @@
   }
 
   .check-btn {
-    height: calc(65px + 15 * (100vw - 768px) / 1440);
+    height: calc(50px + 20 * (100vh - 600px) / 600);
     padding: 0 20px;
     border: 1px solid #fff;
     border-radius: 100px;
@@ -90,7 +90,7 @@
   }
 
   .remove-answer-btn {
-    height: calc(65px + 15 * (100vw - 768px) / 1440);
+    height: calc(50px + 20 * (100vh - 600px) / 600);
     padding: 0 20px;
     border: 1px solid #fff;
     border-radius: 100px;
@@ -98,5 +98,25 @@
   }
 
   .remove-answer-btn:hover {
+    border: 1px solid #373737;
+  }
+
+  .result-text{
+    margin-bottom: 50px;
+  }
+
+  .btn-continue {
+    height: calc(50px + 20 * (100vh - 600px) / 600);
+    font-size: calc(20px + 11 * (100vw - 768px) / 672);
+    width: 40%;
+    padding: 0 20px;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #fff;
+    border-radius: 100px;
+    transition: 0.3s ease;  
+  }
+
+  .btn-continue:hover {
     border: 1px solid #373737;
   }

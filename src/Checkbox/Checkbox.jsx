@@ -1,7 +1,7 @@
 import React from "react";
 import "./styles.css";
 
-export const Checkbox = ({selectedCheckbox, setSelectedCheckbox, children}) => {
+export const Checkbox = ({selectedCheckbox, setSelectedCheckbox, children, isCheckedAnswer}) => {
     const handleCheckboxChange = () => {
         if (selectedCheckbox === children){
             setSelectedCheckbox(null);
@@ -13,6 +13,7 @@ export const Checkbox = ({selectedCheckbox, setSelectedCheckbox, children}) => {
             <input type="checkbox"
             checked={selectedCheckbox === children}
             onChange={handleCheckboxChange}
+            disabled={isCheckedAnswer}
             className="checkbox-element"/>
             <span>{children}</span>
         </label>

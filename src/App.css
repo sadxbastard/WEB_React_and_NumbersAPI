@@ -8,11 +8,11 @@
     margin: 0 auto;
     font-family: Inter, sans-serif; 
     font-weight: 300;
-    font-size: 36px;
+    font-size: calc(22px + 11 * (100vw - 768px) / 672);
   }
 
   .text {
-    font-size: 50px;
+    font-size: calc(35px + 10 * (100vw - 768px) / 672);
   }
   
   .column {
@@ -117,6 +117,7 @@
 
   .content-question-text {
     margin-bottom: 50px;
+    font-size: calc(28px + 4 * (100vw - 768px) / 672);
   }
 
   .content-question-answers {
@@ -126,6 +127,7 @@
   .content-preloader {
     display: none;
     flex: 1;
+    width: 100%;
     border-left: 2px solid #fff;
     border-right: 2px solid #fff;
     border-style: dashed;
@@ -135,7 +137,7 @@
 
   .preloader {
     text-align: start;
-    width: 200px;
+    width: calc(114px + 86 * (100vw - 768px) / 672);
   }
 
   .content-buttons {
@@ -145,4 +147,9 @@
     flex-direction: row;
     justify-content: space-between;
     flex-wrap: wrap;
+  }
+
+  .content-result {
+    display: flex;
+    flex-direction: column;
   }

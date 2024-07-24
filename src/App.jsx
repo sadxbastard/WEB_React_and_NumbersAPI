@@ -3,6 +3,7 @@ import "./components.css";
 import { useState, useEffect, useRef } from 'react';
 import { Checkbox } from "./Checkbox/Checkbox";
 import { getQuestion } from "./Servises.jsx";
+import "./Checkbox/styles.css";
 
 export default function App() {
   const [activeQUIZButton, setActiveQUIZButton] = useState(null);
@@ -15,6 +16,8 @@ export default function App() {
   const [question, setQuestion] = useState("Question");
   const [answers, setAnswers] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
+  const [isCheckedAnswer, setisCheckedAnswer] = useState(false);
+  const [resultText, setResultText] = useState('');
 
   const contentImgRef = useRef(null);
   const questionContentRef = useRef(null);
@@ -24,14 +27,15 @@ export default function App() {
       if (activeQUIZButton === buttonId){
         setActiveQUIZButton(null);
         setIsVisibleImg(true);
+        setIsActiveStart(false);
       }
       else if (activeQUIZButton !== buttonId && !isActtiveStart){
         setActiveQUIZButton(buttonId);
       }
       else{
         setIsActiveStart(false);
-        setActiveQUIZButton(buttonId);
         setIsVisibleImg(true);
+        setActiveQUIZButton(buttonId);
       }
     };
 
@@ -45,30 +49,43 @@ export default function App() {
       }, 1000);
     }
     else if (activeQUIZButton !== null){
-      setIsVisibleImg(false);
-      setIsLoading(true); // show preloader
-      setIsActiveStart(true);
-      try {
-        const questionData = await getQuestion(activeQUIZButton);
-        const modifiedText = questionData.text.replace(activeQUIZButton === "date" ?
-                             questionData.year : questionData.number, '...');
-        setQuestion(modifiedText);
-
-        const correctAnswer = activeQUIZButton === "date" ? questionData.year : questionData.number;
-        setCorrectAnswer(correctAnswer);
-        
-        const answers = generateAnswers(correctAnswer);
-        setAnswers(answers);
-        console.log("Correct ans ID: " + correctAnswer);
-      } catch (error) {
-        console.error('Error fetching question:', error);
-      } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
-      }
+      await doInitialStateAndHandleRequest();
     }
   };
+
+  const handleContinueClick = () => {
+    doInitialStateAndHandleRequest();
+  }
+
+  async function doInitialStateAndHandleRequest() {
+    setIsActiveStart(true);
+    setIsVisibleImg(false);
+    setIsLoading(true); // show preloader
+    
+    setisCheckedAnswer(false);
+    setSelectedCheckbox(null);
+    setQuestion("Question");
+    setAnswers([]);
+    setCorrectAnswer(null);
+    setResultText('');
+    try {
+      const questionData = await getQuestion(activeQUIZButton);
+      const modifiedText = questionData.text.replace(activeQUIZButton === "date" ?
+                            questionData.year : questionData.number, '...');
+      setQuestion(modifiedText);
+
+      const correctAnswer = activeQUIZButton === "date" ? questionData.year : questionData.number;
+      setCorrectAnswer(correctAnswer);
+
+      setAnswers(generateAnswers(correctAnswer));
+    } catch (error) {
+      console.error('Error fetching question:', error);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }
+  }
 
   const handleCheckClick = () => {
     if (selectedCheckbox === null) {
@@ -80,10 +97,11 @@ export default function App() {
       }, 1000);
     }
     else{
+      setisCheckedAnswer(true);
       if(correctAnswer === selectedCheckbox){
-        console.log("Correct");
+        setResultText('Your answer is correct.');
       }
-      else console.log("Uncorrect");
+      else setResultText("Your answer is incorrect.");
     }
   };
 
@@ -143,7 +161,8 @@ export default function App() {
                 Date
               </button>
               <button className={`btn-start ${activeQUIZButton === null ? '' : 'ready'}`}
-                      onClick={handleStartClick}>
+                      onClick={handleStartClick}
+                      disabled={isActtiveStart}>
                 Start
               </button>
             </div>
@@ -178,16 +197,25 @@ export default function App() {
               {answers.map((answer, index) => (
                   <Checkbox key={index} id={index} 
                   selectedCheckbox={selectedCheckbox}
-                  setSelectedCheckbox={setSelectedCheckbox}>{answer}</Checkbox>
+                  setSelectedCheckbox={setSelectedCheckbox}
+                  isCheckedAnswer={isCheckedAnswer}>{answer}</Checkbox>
                 ))}
             </div>
-            <div className="content-buttons">
+            {!isCheckedAnswer && <div className="content-buttons">
               <button className={`check-btn ${selectedCheckbox === null ? '' : 'ready'}`}
-                      onClick={handleCheckClick}>
+                      onClick={handleCheckClick}
+                      id="check">
                 Check
               </button>
-              <button className="remove-answer-btn">Remove one</button>
-            </div>
+              <button className="remove-answer-btn"
+                      id="remove">Remove one</button>
+            </div>}
+            {isCheckedAnswer && 
+            <div className="content-result">
+              <span className="result-text">{resultText}</span>
+              <button className="btn-continue"
+                      onClick={handleContinueClick}>Continue</button>
+            </div>}
           </div>
         </div>
       </div>
