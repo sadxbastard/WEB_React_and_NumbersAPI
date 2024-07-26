@@ -55,7 +55,6 @@
   }
   
   .column2 .content-img {
-    display: flex;
     flex: 1;
     border-left: 2px solid #fff;
     border-right: 2px solid #fff;
@@ -99,7 +98,6 @@
   }
 
   .column2 .content-question {
-    display: block;
     flex: 1;
     border-left: 2px solid #fff;
     border-right: 2px solid #fff;
@@ -125,7 +123,6 @@
   }
 
   .content-preloader {
-    display: none;
     flex: 1;
     width: 100%;
     border-left: 2px solid #fff;

@@ -12,18 +12,16 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingDots, setLoadingDots] = useState(0);
 
-  const [selectedCheckbox, setSelectedCheckbox] = useState(null); 
   const [question, setQuestion] = useState("Question");
+  const [selectedCheckbox, setSelectedCheckbox] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [isCheckedAnswer, setisCheckedAnswer] = useState(false);
   const [resultText, setResultText] = useState('');
-
-  const contentImgRef = useRef(null);
-  const questionContentRef = useRef(null);
-  const loadingRef = useRef(null);
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
 
     const handleQUIZClick = (buttonId) => {
+      setIsLoading(false);
       if (activeQUIZButton === buttonId){
         setActiveQUIZButton(null);
         setIsVisibleImg(true);
@@ -60,7 +58,7 @@ export default function App() {
   async function doInitialStateAndHandleRequest() {
     setIsActiveStart(true);
     setIsVisibleImg(false);
-    setIsLoading(true); // show preloader
+    setIsLoading(true);
     
     setisCheckedAnswer(false);
     setSelectedCheckbox(null);
@@ -99,9 +97,13 @@ export default function App() {
     else{
       setisCheckedAnswer(true);
       if(correctAnswer === selectedCheckbox){
+        setIsCorrectAnswer(true);
         setResultText('Your answer is correct.');
       }
-      else setResultText("Your answer is incorrect.");
+      else {
+        setIsCorrectAnswer(false);
+        setResultText("Your answer is incorrect.");
+      }
     }
   };
 
@@ -119,14 +121,6 @@ export default function App() {
     answersArray.splice(randomIndex, 0, correctAnswer); // insert the correct answer into the array at the specified position
     return answersArray;
   };
-
-  useEffect(() => {
-    if (contentImgRef.current && questionContentRef.current && loadingRef.current) {
-      contentImgRef.current.style.display = isVisibleImg ? 'flex' : 'none';
-      loadingRef.current.style.display = isLoading ? 'flex' : 'none';
-      questionContentRef.current.style.display = !isVisibleImg && !isLoading ? 'block' : 'none';
-    }
-  }, [isVisibleImg, isLoading]);
 
   useEffect(() => {
     let interval;
@@ -180,13 +174,13 @@ export default function App() {
           </div>
         </div>
         <div className="column column2">
-          <div className="content-preloader" ref={loadingRef}>
+          <div className="content-preloader" style={{display: isLoading ? 'flex' : 'none'}}>
             <span className="preloader">Loading{".".repeat(loadingDots)}</span>
           </div>
-          <div className="content-img" ref={contentImgRef}> 
+          <div className="content-img" style={{ display: isVisibleImg ? 'flex' : 'none' }}> 
             <img id="img_quiz" src="/svg_quiz.svg" alt='QUIZ'/>
           </div>
-          <div className="content-question" ref={questionContentRef}>
+          <div className="content-question" style={{display: isVisibleImg || isLoading ? 'none' : 'block'}}>
             <div className="content-question-paragraph">
               <span className="text" id="select">Select an answer</span>
             </div>
@@ -195,10 +189,13 @@ export default function App() {
             </div>
             <div className="content-question-answers">
               {answers.map((answer, index) => (
-                  <Checkbox key={index} id={index} 
-                  selectedCheckbox={selectedCheckbox}
+                  <Checkbox key={index}
                   setSelectedCheckbox={setSelectedCheckbox}
-                  isCheckedAnswer={isCheckedAnswer}>{answer}</Checkbox>
+                  isCheckedAnswer={isCheckedAnswer}
+                  isCorrectAnswer={isCorrectAnswer}
+                  answer={answer}
+                  correctAnswer={correctAnswer}
+                  selected={selectedCheckbox === answer}>{answer}</Checkbox>
                 ))}
             </div>
             {!isCheckedAnswer && <div className="content-buttons">
