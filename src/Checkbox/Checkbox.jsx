@@ -1,4 +1,3 @@
-import React from "react";
 import "./styles.css";
 
 export const Checkbox = ({
@@ -8,7 +7,8 @@ export const Checkbox = ({
     isCorrectAnswer, 
     answer, 
     correctAnswer,
-    selected}) => {
+    selected,
+    removedAnswer}) => {
 
     const handleCheckboxChange = () => {
         if (selected){
@@ -20,18 +20,23 @@ export const Checkbox = ({
     let backgroundColor = "";
     if (isCheckedAnswer) {
         if (selected) {
-        backgroundColor = isCorrectAnswer ? "green" : "red";
+            backgroundColor = isCorrectAnswer ? "green" : "red";
         } else if (answer === correctAnswer) {
-        backgroundColor = "green";
+            backgroundColor = "green";
         }
     }
+    if (removedAnswer !== null && removedAnswer === children){
+        backgroundColor = "red";
+    }
+
+    
 
     return (
         <label className="checkbox-wrapper">
             <input type="checkbox"
             checked={selected}
             onChange={handleCheckboxChange}
-            disabled={isCheckedAnswer}
+            disabled={isCheckedAnswer || (removedAnswer !== null && removedAnswer === children)}
             className="checkbox-element"
             style={{backgroundColor}}/>
             <span>{children}</span>

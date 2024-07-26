@@ -1,9 +1,12 @@
 import "./App.css";
 import "./components.css";
-import { useState, useEffect, useRef } from 'react';
-import { Checkbox } from "./Checkbox/Checkbox";
+import { useState, useEffect } from 'react';
+import { Checkbox } from "./Checkbox/Checkbox.jsx";
 import { getQuestion } from "./Servises.jsx";
-import "./Checkbox/styles.css";
+import { Stats } from "./Stats/Stats.jsx";
+import { UploadLocalStorage } from "./UploadLocalStroge.jsx";
+
+UploadLocalStorage();
 
 export default function App() {
   const [activeQUIZButton, setActiveQUIZButton] = useState(null);
@@ -15,27 +18,36 @@ export default function App() {
   const [question, setQuestion] = useState("Question");
   const [selectedCheckbox, setSelectedCheckbox] = useState(null);
   const [answers, setAnswers] = useState([]);
+  const [incorrectAnswers, setIncorrectAnswers] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [isCheckedAnswer, setisCheckedAnswer] = useState(false);
   const [resultText, setResultText] = useState('');
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
+  const [isRemoveOne, setIsRemoveOne] = useState(false);
+  const [removedAnswer, setRemovedAnswer] = useState(null);
 
-    const handleQUIZClick = (buttonId) => {
-      setIsLoading(false);
-      if (activeQUIZButton === buttonId){
-        setActiveQUIZButton(null);
-        setIsVisibleImg(true);
-        setIsActiveStart(false);
-      }
-      else if (activeQUIZButton !== buttonId && !isActtiveStart){
-        setActiveQUIZButton(buttonId);
-      }
-      else{
-        setIsActiveStart(false);
-        setIsVisibleImg(true);
-        setActiveQUIZButton(buttonId);
-      }
-    };
+
+  const [statsCorrect, setStatsCorrect] = useState(() => parseInt(localStorage.getItem('statsCorrect')) || 0);
+  const [statsIncorrect, setStatsIncorrect] = useState(() => parseInt(localStorage.getItem('statsIncorrect')) || 0);
+  const [statsHints, setStatsHints] = useState(() => parseInt(localStorage.getItem('statsHints')) || 0);
+  const [statsAVG, setStatsAVG] = useState(() => parseFloat(localStorage.getItem('statsAVG')) || 0);
+
+  const handleQUIZClick = (buttonId) => {
+    setIsLoading(false);
+    if (activeQUIZButton === buttonId){
+      setActiveQUIZButton(null);
+      setIsVisibleImg(true);
+      setIsActiveStart(false);
+    }
+    else if (activeQUIZButton !== buttonId && !isActtiveStart){
+      setActiveQUIZButton(buttonId);
+    }
+    else{
+      setIsActiveStart(false);
+      setIsVisibleImg(true);
+      setActiveQUIZButton(buttonId);
+    }
+  };
 
   const handleStartClick = async () => {
     if (activeQUIZButton === null) {
@@ -66,6 +78,8 @@ export default function App() {
     setAnswers([]);
     setCorrectAnswer(null);
     setResultText('');
+    setIsRemoveOne(false);
+    setRemovedAnswer(null);
     try {
       const questionData = await getQuestion(activeQUIZButton);
       const modifiedText = questionData.text.replace(activeQUIZButton === "date" ?
@@ -94,18 +108,46 @@ export default function App() {
         spanElement.classList.remove('shake');
       }, 1000);
     }
-    else{
+    else {
       setisCheckedAnswer(true);
-      if(correctAnswer === selectedCheckbox){
+      if (correctAnswer === selectedCheckbox) {
         setIsCorrectAnswer(true);
+        setStatsCorrect(prev => {
+          const newStatsCorrect = prev + 1;
+          localStorage.setItem('statsCorrect', newStatsCorrect);
+          return newStatsCorrect;
+        });
         setResultText('Your answer is correct.');
-      }
-      else {
+      } else {
         setIsCorrectAnswer(false);
+        setStatsIncorrect(prev => {
+          const newStatsIncorrect = prev + 1;
+          localStorage.setItem('statsIncorrect', newStatsIncorrect);
+          return newStatsIncorrect;
+        });
         setResultText("Your answer is incorrect.");
       }
     }
   };
+
+  useEffect(() => {
+    if (statsCorrect + statsIncorrect > 0) {
+      const newStatsAVG = parseInt((statsCorrect / (statsCorrect + statsIncorrect)) * 100);
+      setStatsAVG(newStatsAVG);
+      localStorage.setItem('statsAVG', newStatsAVG.toFixed(2));
+    }
+  }, [statsCorrect, statsIncorrect]);
+
+  const handleRemoveOneClick = () => {
+    setIsRemoveOne(true);
+    const randomIndex = Math.floor(Math.random() * incorrectAnswers.length);
+    setRemovedAnswer(incorrectAnswers[randomIndex]);
+    setStatsHints(prev => {
+      const newStatsHints = prev + 1;
+      localStorage.setItem('statsHints', newStatsHints);
+      return newStatsHints;
+    });
+  }
 
   const generateAnswers = (correctAnswer) => {
     const incorrectAnswers = new Set(); // created set, so that there are no duplicate values
@@ -117,6 +159,7 @@ export default function App() {
       incorrectAnswers.add(incorrectAnswer);
     }
     const answersArray = [...incorrectAnswers]; // converting a set into an array
+    setIncorrectAnswers(answersArray);
     const randomIndex = Math.floor(Math.random() * 4); // define a random position for the correct answer
     answersArray.splice(randomIndex, 0, correctAnswer); // insert the correct answer into the array at the specified position
     return answersArray;
@@ -163,13 +206,10 @@ export default function App() {
           </div>
           <div className="row2">
             <div className="container-row2">
-              <span className="text">Your stats</span>
-              <div className="container-stats">
-                <span className="text-stats">Correct: 0</span>
-                <span className="text-stats">Incorrect: 0</span>
-                <span className="text-stats">Hints used: 0</span>
-                <span className="text-stats">AVG: 0</span>
-              </div>
+              <Stats statsCorrect={statsCorrect}
+                     statsIncorrect={statsIncorrect}
+                     statsHints={statsHints}
+                     statsAVG={statsAVG}></Stats>
             </div>
           </div>
         </div>
@@ -195,17 +235,18 @@ export default function App() {
                   isCorrectAnswer={isCorrectAnswer}
                   answer={answer}
                   correctAnswer={correctAnswer}
-                  selected={selectedCheckbox === answer}>{answer}</Checkbox>
+                  selected={selectedCheckbox === answer}
+                  removedAnswer={removedAnswer}>{answer}</Checkbox>
                 ))}
             </div>
-            {!isCheckedAnswer && <div className="content-buttons">
+            {!isCheckedAnswer && 
+            <div className="content-buttons">
               <button className={`check-btn ${selectedCheckbox === null ? '' : 'ready'}`}
                       onClick={handleCheckClick}
-                      id="check">
-                Check
-              </button>
-              <button className="remove-answer-btn"
-                      id="remove">Remove one</button>
+                      id="check">Check</button>
+              <button className={`remove-answer-btn ${isRemoveOne === false ? '' : 'clicked'}`}
+                      id="remove"
+                      onClick={handleRemoveOneClick}>Remove one</button>
             </div>}
             {isCheckedAnswer && 
             <div className="content-result">
