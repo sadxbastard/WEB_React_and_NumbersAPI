@@ -177,6 +177,25 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isLoading]);
 
+  const ResetStats = () => {
+    if (localStorage.getItem('statsCorrect') !== 0) {
+      localStorage.setItem('statsCorrect', 0);
+      setStatsCorrect(0);
+    }
+    if (localStorage.getItem('statsIncorrect') !== 0) {
+      localStorage.setItem('statsIncorrect', 0);
+      setStatsIncorrect(0);
+    }
+    if (localStorage.getItem('statsHints') !== 0) {
+      localStorage.setItem('statsHints', 0);
+      setStatsHints(0);
+    }
+    if (localStorage.getItem('statsAVG') !== 0) {
+      localStorage.setItem('statsAVG', 0);
+      setStatsAVG(0);
+    }
+  }
+
   return (
     <>
       <link rel="icon" href="data:;base64,="></link>
@@ -210,6 +229,8 @@ export default function App() {
                      statsIncorrect={statsIncorrect}
                      statsHints={statsHints}
                      statsAVG={statsAVG}></Stats>
+              <button className={`reset-stats-btn ${statsCorrect !== 0 || statsIncorrect !== 0 || statsHints !== 0 ? '' : 'inactive'}`}
+                      onClick={ResetStats}>Reset</button>
             </div>
           </div>
         </div>
