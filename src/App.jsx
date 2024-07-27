@@ -158,10 +158,12 @@ export default function App() {
         : correctAnswer - randomOffset;
       incorrectAnswers.add(incorrectAnswer);
     }
+    
     const answersArray = [...incorrectAnswers]; // converting a set into an array
-    setIncorrectAnswers(answersArray);
+    console.log(answersArray);
     const randomIndex = Math.floor(Math.random() * 4); // define a random position for the correct answer
     answersArray.splice(randomIndex, 0, correctAnswer); // insert the correct answer into the array at the specified position
+    setIncorrectAnswers(answersArray.filter(answer => answer !== correctAnswer));
     return answersArray;
   };
 
